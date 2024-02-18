@@ -45,11 +45,11 @@ randomStrafe() {
   }
 
   start() {
-    if (this.target_G) {
-      if (this.isEating) return;
-      const dist = this.bot.entity.position.distanceTo(this.target_G.position)
-      const move = false;
-      if (this.inCombat) {
+    console.log("called")
+      if (this.bot.isEating) return;
+      const dist = this.bot.entity.position.distanceTo(this.bot.attackHandler.target_G.position)
+      if (!this.bot.attackHandler.inCombat) return;
+        console.log("second called")
         this.bot.setControlState("jump", true)
         this.bot.setControlState("forward", true)
         if (this.bot.commonsense.isDoingTask) {
@@ -77,10 +77,9 @@ randomStrafe() {
         }
 
 
-      }
+      
     }
   }
-}
 
 function loadMovement(bot) {
   bot.movement = new Movement(bot)

@@ -1,4 +1,4 @@
-const Fighter = require("../Combat.js");
+;
 
 const Vec3 = require("vec3").Vec3
 const sleep = async (ms = 2000) => {
@@ -57,7 +57,7 @@ class Commonsense {
     let cobwebIdx = blocksAtBotPos.findIndex(b => b?.name.includes("cobweb"));
 
     while (cobwebIdx !== -1) {
-
+      if (this.bot.isEating) return;
       const blockAtBotPos = blocksAtBotPos[cobwebIdx];
       if (!blockAtBotPos) return;
 
@@ -66,7 +66,7 @@ class Commonsense {
       const items = this.bot.inventory.items()
       const sword = items.find(item => item.name.includes("sword"));
       const waterBucket = items.find(item => item.name.includes("water_bucket"));
-      const Pearl = items.find(item => item.name.includes("ender_pearl"));
+      const chorus_fruit = items.find(item => item.name.includes("chorus_fruit"));
 
       if (waterBucket) {
         // 0.5, 0.5, 0.5 is center of block
@@ -92,7 +92,13 @@ class Commonsense {
           this.bot.activateItem(false);
         }
 
-      } else if (sword) {
+      }else if (chorus_fruit) {
+        if (this.bot.isEating) return;
+        await this.bot.equip(chorus_fruit, "hand");
+        this.bot.activateItem(false);
+        await sleep(1600)
+        this.bot.deactivateItem()
+      }else if (sword) {
         if (this.bot.heldItem && this.bot.heldItem !== sword) {
           await this.bot.equip(sword, "hand");
         } else if (!this.bot.heldItem) {

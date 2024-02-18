@@ -25,19 +25,19 @@ setTarget(target) {
  // Our first method
  async attack() {
     const atk = async () => {
-
+      
       if (this.bot.commonsense.isDoingTask) return;
       if (this.bot.isEating) return;
       if (this.targetUsername !== "") {
         const targetEntity = this.bot.players[this.targetUsername]?.entity
 
         if (targetEntity) {
-          this.inCombat = true;
           // getting distance between bot and targ
+          this.inCombat = true
           const distance = Math.round(this.bot.entity.position.distanceTo(targetEntity.position))
           // Do something
          
-          if (between(distance, 0, 3) && !this.isEating) {
+          if (between(distance, 0, 3) && !this.bot.isEating) {
             const offHandItem = this.bot.inventory.slots[45];
             if (this.bot.isUsingHeldItem && offHandItem && offHandItem.name === "shield") {
              if (this.bot.isUsingHeldItem && shield) {
@@ -79,20 +79,20 @@ setTarget(target) {
     this.targetUsername = "";
 
 
+    this.bot.smartAim.stop()
+    this.bot.clearControlStates()
+    clearInterval(this.atkInter)
   }
   stopTemporarily() {
-    this.inCombat = false;
+    this.inCombat = true;
     this.bot.clearControlStates()
-
-
   }
 
   startAttacking() {
-    this.inCombat = false;
+    this.inCombat = true;
 
-
-    this.setTarget(this.target_G)
-    this.attack()
+    this.bot.smartAim.start(this.targetUsername)
+    this.attack(this.target_G)
   }
 }
 

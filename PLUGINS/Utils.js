@@ -1,4 +1,8 @@
 // Main class
+const sleep = async (ms = 2000) => {
+  return new Promise((r) => setTimeout(r, ms));
+};
+
 class Utils {
     // Take the bot as a parameter
     constructor(bot) {
@@ -63,22 +67,23 @@ async equipWeapon() {
       if (this.bot.isEating) return;
 
       this.bot.isEating = true;
+      console.log(this.bot.utils.isEating)
       await this.bot.equip(gaps, "hand");
       this.bot.activateItem(false);
       await sleep(1600)
       this.bot.deactivateItem()
 
       this.bot.isEating = false;
+     
 
       this.equipWeapon()
 
-    } catch {
+    } catch (error) {
+      console.log(error)
       console.log("shit bro failed to eat...")
       this.bot.isEating = false;
     }
   }
-
- 
 
   async throwHealingPot() {
     if (this.isPotting) return;
@@ -119,49 +124,56 @@ async equipWeapon() {
   }
 
   async readyUp() {
-    console.log("getting caleed here")
+    console.log("getting called here");
     const inv = this.bot.inventory.items();
     
     const fireResistancePotion = inv.find((item) => {
-      return item.nbt?.value?.Potion?.value.includes("fire");
+        return item.nbt?.value?.Potion?.value.includes("fire");
     });
     
     const swiftnessPotion = inv.find((item) => {
-      return item.nbt?.value?.Potion?.value.includes("swiftness");
+        return item.nbt?.value?.Potion?.value.includes("swiftness");
     });
-     const strenghtPotion = inv.find((item) => {
-      return item.nbt?.value?.Potion?.value.includes("strength");
+    
+    const strengthPotion = inv.find((item) => {
+        return item.nbt?.value?.Potion?.value.includes("strength");
     });
 
 
-    if (!fireResistancePotion && !swiftnessPotion && !strenghtPotion) {
-      this.bot.chat("no potions returning..");
-      return;
+    if (!fireResistancePotion && !swiftnessPotion && !strengthPotion) {
+        this.bot.chat("No potions found.");
+        return;
     }
 
     const throwPot = async (pot) => {
-      return new Promise(async (res, rej) => {
-        try {
-          await this.bot.smoothLook.lookAt(
-            this.bot.entity.position.offset(0, -1, 0),
-            50,
-            true
-          );
-          await sleep(100);
-          await this.bot.equip(pot, "hand");
-          this.bot.activateItem();
-          res();
-        } catch (err) {
-          console.log(err)
-        }
-      });
+        return new Promise(async (res, rej) => {
+            try {
+                await this.bot.smoothLook.lookAt(
+                    this.bot.entity.position.offset(0, -1, 0),
+                    50,
+                    true
+                );
+                await sleep(90);
+                if (!pot) {
+                    console.log("No potion provided to throwPot");
+                    res();
+                    return;
+                }
+                await this.bot.equip(pot, "hand");
+                this.bot.activateItem();
+                this.bot.deactivateItem();
+                res();
+            } catch (err) {
+                console.log(err);
+                rej(err);
+            }
+        });
     };
 
-    
     await throwPot(fireResistancePotion);
     await throwPot(swiftnessPotion);
-    await throwPot(strenghtPotion);
-  }
+    await throwPot(strengthPotion);
+}
 
 
   generateRandom(maxLimit = 100) {

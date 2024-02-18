@@ -26,6 +26,7 @@ process.on('uncaughtException', (err) => {
 
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
 const { stat } = require("fs");
+const { brotliCompress } = require("zlib");
 
 
 function initBot() {
@@ -50,18 +51,20 @@ function initBot() {
  
 
   let follow;
+  let variableToEat;
 
   bot.once("spawn", () => {
   
     bot.on("death", () => {
       bot.chat("darn")
       bot.attackHandler.inCombat = false;
-      bot.attackHandler.stop()
+      bot.attackHandler.stop() 
+      follow = !follow;
     })
 
     bot._client.on('entity_metadata',(packet) => {
-      if (bot.utils.isEating) return;
-      //shieldListener(packet)
+      if (bot.isEating) return;
+      shieldListener(packet)
     });
     
 
@@ -73,8 +76,9 @@ function initBot() {
     if (bot.attackHandler.target_G) {
       if (e.id == bot.attackHandler.target_G.id) {
         bot.chat("HAHHAH gg")
-        fight.inCombat = false;
+        bot.attackHandler.inCombat = false;
         bot.attackHandler.stop()
+        follow = !follow;
       }
     }
   })
@@ -85,13 +89,9 @@ function initBot() {
      }
      bot.commonsense.start()
 
-     let totalCheck = (bot.health + bot.food + bot.foodSaturation);
-     let variableToEat;
-     if (bot.inCombat) { variableToEat = 35} else { variableToEat = 30 }
-
-      if (totalCheck <= variableToEat) {
-        if (!bot.utils.isEating) {
-          if (bot.utils.isEating) return;
+     if (bot.inCombat) { variableToEat = 25 } else { variableToEat = 30 }
+      if ((bot.health + bot.food + bot.foodSaturation) < variableToEat) {
+        if (!bot.isEating) {
           bot.utils.eatGap()
         }
       }
@@ -119,7 +119,7 @@ function initBot() {
     switch (cmd) {
       case "Follow":
       case "follow": {
-        follow = !follow
+        follow = true;
         break;
       }
 
@@ -139,6 +139,7 @@ function initBot() {
       case "stop":
       case "Stop": {
        bot.attackHandler.stop()
+       follow = !follow;
         break;
       }
 
@@ -161,16 +162,18 @@ function initBot() {
           const target = player || username;
           if (target === bot.username) return;
           const check = bot.players[target]?.entity
-          if (!check) return bot.chat("i aint gonna attack no ghost");
-          
+          if (!check) return bot.chat("i aint gonna attack no ghost bruv");
+        
           await bot.utils.equipShield()
+          await bot.utils.readyUp()
           await bot.utils.eatGap()
-
-          bot.equip.equipWeapon()
-          follow = !follow
+          bot.utils.equipWeapon()
+          
+          follow = !follow;
 
           bot.attackHandler.setTarget(target);
-          bot.attackHandler.attack()
+          bot.attackHandler.startAttacking()
+         
         }
         break;
       }
@@ -188,34 +191,36 @@ function initBot() {
 
   //Thanks to Genrel for this code#7675 for this code!
   const shieldListener = async (packet) => {
-    if (!fight.inCombat) return;
+    if (!bot.attackHandler.inCombat) return;
     if (bot.commonsense.isDoingTask) return;
+    if (bot.isEating) return;
     // Define Variable here
     var inv = bot.inventory;
     const axe = inv.items().find((item) => item.name.includes("axe"));
     const weapon = inv.items().find((item) => item.name.includes("sword"));
-    const distance = Math.round(bot.entity.position.distanceTo(fight.target_G.position))
-
+    const distance = Math.round(bot.entity.position.distanceTo(bot.attackHandler.target_G.position))
+    if (!distance) return;
+    if (distance <= 3) return;
     if (!packet.entityId || !packet.metadata || packet.metadata.length === 0) return;
     if (!packet.metadata[0].key || packet.metadata[0].key !== 8) return;
     if (!bot.entities[packet.entityId]) return;
     const entity = bot.entities[packet.entityId];
     if (entity.type === 'player') {
         const state = (packet.metadata[0].value === 3);
-        if (entity.type === 'player' && entity.id == fight.target_G.id) {
+        if (entity.type === 'player' && entity.id == bot.attackHandler.target_G.id) {
           console.log("called")
-          if (fight.target_G.metadata[8] === 3 && fight.target_G.equipment[1]?.name === "shield") {
+          if (bot.attackHandler.target_G.metadata[8] === 3 && bot.attackHandler.target_G.equipment[1]?.name === "shield") {
             if (bot.isUsingHeldItem) return;
-            while (fight.target_G.metadata[8] === 3 && fight.target_G.equipment[1]?.name === "shield") {
+            while (bot.attackHandler.target_G.metadata[8] === 3 && bot.attackHandler.target_G.equipment[1]?.name === "shield") {
               if (bot.commonsense.isDoingTask) return;
             if (bot.heldItem.name?.includes("axe")) {
               bot.waitForTicks(4)
               if (distance < 3) {
                 bot.equip(axe, "hand")
-                if (!fight.target_G) return;
-                while (fight.target_G.metadata[8] === 3 && fight.target_G.equipment[1]?.name === "shield") {
+                if (!bot.attackHandler.target_G) return;
+                while (bot.attackHandler.target_G.metadata[8] === 3 && bot.attackHandler.target_G.equipment[1]?.name === "shield") {
                   await bot.waitForTicks(3)
-                  await bot.attack(fight.target_G, true)
+                  await bot.attack(bot.attackHandler.target_G, true)
                  }
                 if (!weapon) {
                   return;
@@ -230,9 +235,9 @@ function initBot() {
               return;
             } 
             bot.equip(axe, "hand")
-            while (fight.target_G.metadata[8] === 3 && fight.target_G.equipment[1]?.name === "shield") {
+            while (bot.attackHandler.target_G.metadata[8] === 3 && bot.attackHandler.target_G.equipment[1]?.name === "shield") {
              await bot.waitForTicks(5)
-             await bot.attack(fight.target_G, true)
+             await bot.attack(bot.attackHandler.target_G, true)
             }
             if (distance < 3) return;
             await bot.waitForTicks(1)
@@ -243,13 +248,9 @@ function initBot() {
         }
       }
     }
-    if (!fight.target_G.metadata[8] === 3 && !fight.target_G.equipment[1]?.name === "shield") {
-        bot.equip(weapon, "hand")
-    }
+  bot.equip(weapon, "hand")
 }
         
-
-
 
 
 
