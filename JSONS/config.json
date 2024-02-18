@@ -1,0 +1,15 @@
+{
+    "server": {
+      "host": "us1.node.minecraft.sneakyhub.com",
+      "port": "25607"
+    },
+    "bots": {
+      "Username": "RN",
+      "NumberOfBotsToSpawn": 5,
+      "Version": "1.18.2"
+    },
+    "Optimizations": {
+        "RenderDistance" : 10,
+        "SpawnDelay": "5000"
+    }
+  }
