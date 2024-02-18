@@ -1,4 +1,4 @@
-;
+
 
 const Vec3 = require("vec3").Vec3
 const sleep = async (ms = 2000) => {
