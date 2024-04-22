@@ -1,0 +1,18 @@
+{
+    "server": {
+      "host": "donator8.cortexnodes.com",
+      "port": "25902"
+    },
+    "bots": {
+      "Username": "MT",
+      "NumberOfBotsToSpawn": 16,
+      "Version": "1.18.2"
+    },
+    "Optimizations": {
+        "RenderDistance" : 10,
+        "SpawnDelay": "5000"
+    },
+    "Settings": {
+      "RandomPlayStyle" : false
+    }
+  }
