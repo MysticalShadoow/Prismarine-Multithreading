@@ -20,20 +20,20 @@ class Utils {
 
 
 async equipWeapon() {
-    if (this.bot.isUsingHeldItem) return;
-    if (this.bot.heldItem && (this.bot.heldItem.name.includes("sword") || this.bot.heldItem.name.includes("axe"))) {
-      if (this.bot.heldItem.name.includes("axe")) {
-        const sword = this.bot.inventory.items().find((item) => item.name.includes("sword"));
-        if (sword) {
-          this.bot.equip(sword)
-        }
+  if (this.bot.isUsingHeldItem) return;
+  if (this.bot.heldItem && (this.bot.heldItem.name.includes("sword") || this.bot.heldItem.name.includes("axe"))) {
+    if (this.bot.heldItem.name.includes("axe")) {
+      const sword = this.bot.inventory.items().find((item) => item.name.includes("sword"));
+      if (sword) {
+        this.bot.equip(sword)
       }
     }
-    const weapon = this.bot.inventory.items().find((item) => item.name.includes("sword") || item.name.includes("axe"));
-    if (!weapon) {
-      return;
-    }
-    this.bot.equip(weapon, "hand");
+  }
+  const weapon = this.bot.inventory.items().find((item) => item.name.includes("sword") || item.name.includes("axe"));
+  if (!weapon) {
+    return;
+  }
+  this.bot.equip(weapon, "hand");
 }
 
   async equipTotem() {
@@ -225,6 +225,8 @@ getPlayerData() {
     return rand;
   }
 
+
+
   pickRandomNumber(start, end) {
     /**
      * Picks a random number within a specified range.
@@ -239,6 +241,7 @@ getPlayerData() {
         return Math.floor(Math.random() * (end - start + 1)) + start;
     }
  }
+ 
 }
 
 function loadUtils(bot) {

@@ -1,11 +1,11 @@
 {
     "server": {
-      "host": "donator8.cortexnodes.com",
-      "port": "25902"
+      "host": "eu1.mc.sneaky.ovh",
+      "port": "30146"
     },
     "bots": {
-      "Username": "MT",
-      "NumberOfBotsToSpawn": 16,
+      "Username": "ManePear",
+      "NumberOfBotsToSpawn": 12,
       "Version": "1.18.2"
     },
     "Optimizations": {
@@ -13,6 +13,6 @@
         "SpawnDelay": "5000"
     },
     "Settings": {
-      "RandomPlayStyle" : false
+      "RandomPlayStyle" : true
     }
   }
